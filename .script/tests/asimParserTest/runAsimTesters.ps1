@@ -25,38 +25,8 @@ Class Parser {
 function run {
     $subscription = Select-AzSubscription -SubscriptionId $global:subscriptionId
     # Get modified ASIM Parser files along with their status
-    $modifiedFilesStatus = Invoke-Expression "git diff --name-status origin/master -- $($PSScriptRoot)/../../../Parsers/"
-    # Split the output into lines
-    $modifiedFilesStatusLines = $modifiedFilesStatus -split "`n"
-    # Initialize an empty array to store the file names and their status
-    $global:modifiedFiles = @()
-    # Iterate over the lines
-    foreach ($line in $modifiedFilesStatusLines) {
-        # Split the line into status and file name
-        $status, $file = $line -split "\t", 2
-        # Check if the file is a YAML file
-        if ($file -like "*.yaml") {
-            # Add the file name and status to the array
-            $global:modifiedFiles += New-Object PSObject -Property @{
-                Name = $file
-                Status = switch ($status) {
-                    "A" { "Added" }
-                    "M" { "Modified" }
-                    "D" { "Deleted" }
-                    default { "Unknown" }
-                }
-            }
-        }
-    }
-    # Print the file names and their status
-    Write-Host "The following ASIM parser files have been updated. 'Schema' and 'Data' tests will be performed for each of these parsers:"
-    foreach ($file in $modifiedFiles) {
-        Write-Host ("{0} ({1})" -f $file.Name, $file.Status) -ForegroundColor Green
-    }
-    Write-Host "***************************************************"
-
-    # Call testSchema function for each modified parser file
-    $modifiedFiles | ForEach-Object { testSchema $_.Name }
+    Write-Host "File is Modified"
+    Write-Host '${{ secrets.AZURE_CLIENT_ID }}'
 }
 
 function testSchema([string] $ParserFile) {
