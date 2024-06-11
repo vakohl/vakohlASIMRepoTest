@@ -2,11 +2,11 @@ $global:failed = 0
 
 # Subscription ID which contains Log Analytics workspace where the ASim schema and data tests will be conducted
 #$global:subscriptionId = "4383ac89-7cd1-48c1-8061-b0b3c5ccfd97"
-$global:subscriptionId = "a2c2c31d-ebd4-4880-a60c-d615efa9d201"
+$global:subscriptionId = "419581d6-4853-49bd-83b6-d94bb8a77887"
 
 # Workspace ID for the Log Analytics workspace where the ASim schema and data tests will be conducted
 #$global:workspaceId = "46bec743-35fa-4608-b7e2-2aa3c38a97c2"
-$global:workspaceId = "02dd2616-a0e2-4ca5-a303-bd69e22e0c12"
+$global:workspaceId = "059f037c-1b3b-42b1-bb90-e340e8c3142c"
 
 Class Parser {
     [string] $Name
@@ -25,8 +25,38 @@ Class Parser {
 function run {
     $subscription = Select-AzSubscription -SubscriptionId $global:subscriptionId
     # Get modified ASIM Parser files along with their status
-    Write-Host "File is Modified"
-    Write-Host '${{ secrets.AZURE_CLIENT_ID }}'
+    $modifiedFilesStatus = Invoke-Expression "git diff --name-status origin/master -- $($PSScriptRoot)/../../../Parsers/"
+    # Split the output into lines
+    $modifiedFilesStatusLines = $modifiedFilesStatus -split "`n"
+    # Initialize an empty array to store the file names and their status
+    $global:modifiedFiles = @()
+    # Iterate over the lines
+    foreach ($line in $modifiedFilesStatusLines) {
+        # Split the line into status and file name
+        $status, $file = $line -split "\t", 2
+        # Check if the file is a YAML file
+        if ($file -like "*.yaml") {
+            # Add the file name and status to the array
+            $global:modifiedFiles += New-Object PSObject -Property @{
+                Name = $file
+                Status = switch ($status) {
+                    "A" { "Added" }
+                    "M" { "Modified" }
+                    "D" { "Deleted" }
+                    default { "Unknown" }
+                }
+            }
+        }
+    }
+    # Print the file names and their status
+    Write-Host "The following ASIM parser files have been updated. 'Schema' and 'Data' tests will be performed for each of these parsers:"
+    foreach ($file in $modifiedFiles) {
+        Write-Host ("{0} ({1})" -f $file.Name, $file.Status) -ForegroundColor Green
+    }
+    Write-Host "***************************************************"
+
+    # Call testSchema function for each modified parser file
+    $modifiedFiles | ForEach-Object { testSchema $_.Name }
 }
 
 function testSchema([string] $ParserFile) {
