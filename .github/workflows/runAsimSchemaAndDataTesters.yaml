@@ -51,7 +51,7 @@ jobs:
           git config --local user.name "github-actions[bot]"
           git config --local user.email "<>"
 
-      - name: Merge master into pull request branch
+      - name: Merge main into pull request branch
         run: |
           git merge origin/main
           Conflicts=$(git ls-files -u | wc -l)
