@@ -26,6 +26,7 @@ permissions:
   
 jobs: 
   Run-ASim-Schema-Data-tests:
+    name: Run ASim Schema and Data testers
     runs-on: ubuntu-latest
     environment: Staging
     steps:
@@ -69,6 +70,7 @@ jobs:
           errorActionPreference: continue
           failOnStandardError: false
   Run-ASim-TemplateValidation:
+    name: Run ASim Template Validation tests
     runs-on: ubuntu-latest
     environment: Staging
     steps:
