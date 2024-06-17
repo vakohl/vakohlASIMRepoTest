@@ -106,4 +106,4 @@ jobs:
               pip install tabulate
       - name: Run Python script
         run: |
-              python ./.github/workflows/ASimTemplateValidation.py
+              python .script/tests/asimParserTest/VerifyASimParserTemplate.py
